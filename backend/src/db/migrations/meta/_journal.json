@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1753275258926,
+      "tag": "0000_robust_ma_gnuci",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1754489810594,
+      "tag": "0001_ambitious_colonel_america",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1756971396427,
+      "tag": "0002_dusty_the_twelve",
+      "breakpoints": true
+    }
+  ]
+}

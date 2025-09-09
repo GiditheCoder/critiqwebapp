@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "votes_song_id_unique" ON "votes" USING btree ("song_id");
