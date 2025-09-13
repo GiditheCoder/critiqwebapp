@@ -23,57 +23,101 @@ const ArtisteSignIn = () => {
     navigate('/artiste-signup');
   };
 
+  // const handleSignIn = async () => {
+  //   if (!email || !password) {
+  //     alert('Error: Please fill in all fields');
+  //     return;
+  //   }
+
+  //   if (isSignedIn) {
+  //     alert('You are already signed in');
+  //     navigate('/artist-route', { replace: true });
+  //     return;
+  //   }
+
+  //   if (!signInLoaded) {
+  //     console.warn('Clerk signIn not loaded yet');
+  //     return;
+  //   }
+
+  //   setLoading(true);
+
+  //   try {
+  //     const signInAttempt = await signIn.create({
+  //       identifier: email,
+  //       password,
+  //       strategy: 'password',
+  //     });
+
+  //     let finalAttempt = signInAttempt;
+  //     if (finalAttempt.status === 'needs_first_factor') {
+  //       const attempt = await signIn.attemptFirstFactor({
+  //         strategy: 'password',
+  //         password,
+  //       });
+  //       finalAttempt = attempt;
+  //     }
+
+  //     if (finalAttempt.status === 'complete' && finalAttempt.createdSessionId) {
+  //       await setActive({ session: finalAttempt.createdSessionId });
+  //       alert('Sign in successful');
+  //       navigate('/works', { replace: true });
+  //     } else {
+  //       console.error('Sign in did not complete:', finalAttempt);
+  //       alert('Error: Sign in failed. Check console for details.');
+  //     }
+  //   } catch (err) {
+  //     console.error('Sign-in error ->', err);
+  //     const msg = err?.errors?.[0]?.message || err?.message || 'Sign in failed';
+  //     alert('Error: ' + msg);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
   const handleSignIn = async () => {
-    if (!email || !password) {
-      alert('Error: Please fill in all fields');
-      return;
-    }
+  if (!email || !password) return alert("Please fill in all fields");
+  if (!signInLoaded) return;
 
-    if (isSignedIn) {
-      alert('You are already signed in');
-      navigate('/artist-route', { replace: true });
-      return;
-    }
+  setLoading(true);
+  try {
+    const signInAttempt = await signIn.create({
+      identifier: email,
+      password,
+      strategy: "password",
+    });
 
-    if (!signInLoaded) {
-      console.warn('Clerk signIn not loaded yet');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const signInAttempt = await signIn.create({
-        identifier: email,
+    let finalAttempt = signInAttempt;
+    if (finalAttempt.status === "needs_first_factor") {
+      finalAttempt = await signIn.attemptFirstFactor({
+        strategy: "password",
         password,
-        strategy: 'password',
       });
-
-      let finalAttempt = signInAttempt;
-      if (finalAttempt.status === 'needs_first_factor') {
-        const attempt = await signIn.attemptFirstFactor({
-          strategy: 'password',
-          password,
-        });
-        finalAttempt = attempt;
-      }
-
-      if (finalAttempt.status === 'complete' && finalAttempt.createdSessionId) {
-        await setActive({ session: finalAttempt.createdSessionId });
-        alert('Sign in successful');
-        navigate('/works', { replace: true });
-      } else {
-        console.error('Sign in did not complete:', finalAttempt);
-        alert('Error: Sign in failed. Check console for details.');
-      }
-    } catch (err) {
-      console.error('Sign-in error ->', err);
-      const msg = err?.errors?.[0]?.message || err?.message || 'Sign in failed';
-      alert('Error: ' + msg);
-    } finally {
-      setLoading(false);
     }
-  };
+
+    if (finalAttempt.status === "complete" && finalAttempt.createdSessionId) {
+      // 👉 Fetch the user object to check their role
+      const { user } = finalAttempt;
+      const role = user?.publicMetadata?.role;
+
+      if (role !== "artiste") {
+        alert("This account is not an artiste account.");
+        return; // 🚫 Don't call setActive
+      }
+
+      await setActive({ session: finalAttempt.createdSessionId });
+      navigate("/works", { replace: true });
+    } else {
+      alert("Sign in failed");
+    }
+  } catch (err) {
+    console.error(err);
+    alert(err?.errors?.[0]?.message || "Sign in failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleGoogleSignIn = async () => {
     if (isSignedIn) {

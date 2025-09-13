@@ -156,3 +156,7 @@ const Role = () => {
 };
 
 export default Role;
+
+// useEffect(() => {
+//   console.log("Current path:", location.pathname);
+// }, [location]);

@@ -21,60 +21,106 @@ const Signin = () => {
     navigate('/signup');
   };
 
-  const handleSignIn = async () => {
-    // this works correctly
-    if (!email || !password) {
-      alert('Error: Please fill in all fields');
-      return;
-    }
+  // const handleSignIn = async () => {
 
-    if (isSignedIn) {
-      alert('You are already signed in');
-      navigate('/works', { replace: true });
-      return;
-    }
+  //   // this works correctly
+  //   if (!email || !password) {
+  //     alert('Error: Please fill in all fields');
+  //     return;
+  //   }
 
-    if (!signInLoaded) {
-      console.warn('Clerk signIn not loaded yet');
-      return;
-    }
+  //   if (isSignedIn) {
+  //     alert('You are already signed in');
+  //     navigate('/works', { replace: true });
+  //     return;
+  //   }
 
-    setLoading(true);
+  //   if (!signInLoaded) {
+  //     console.warn('Clerk signIn not loaded yet');
+  //     return;
+  //   }
 
-    try {
-      const signInAttempt = await signIn.create({
-        identifier: email,
-        password,
-        strategy: 'password',
-      });
+  //   setLoading(true);
 
-      let finalAttempt = signInAttempt;
-      if (finalAttempt.status === 'needs_first_factor') {
-        const attempt = await signIn.attemptFirstFactor({
-          strategy: 'password',
-          password,
-        });
-        finalAttempt = attempt;
-      }
+  //   try {
+  //     const signInAttempt = await signIn.create({
+  //       identifier: email,
+  //       password,
+  //       strategy: 'password',
+  //     });
 
-      if (finalAttempt.status === 'complete' && finalAttempt.createdSessionId) {
-        await setActive({ session: finalAttempt.createdSessionId });
-        alert('Sign in successful');
-        navigate('/works', { replace: true });
-      } else {
-        console.error('Sign in did not complete:', finalAttempt);
-        alert('Error: Sign in failed. Check console for details.');
-      }
-    } catch (err) {
-      console.error('Sign-in error ->', err);
-      const msg = err?.errors?.[0]?.message || err?.message || 'Sign in failed';
-      alert('Error: ' + msg);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     let finalAttempt = signInAttempt;
+  //     if (finalAttempt.status === 'needs_first_factor') {
+  //       const attempt = await signIn.attemptFirstFactor({
+  //         strategy: 'password',
+  //         password,
+  //       });
+  //       finalAttempt = attempt;
+  //     }
+
+  //     if (finalAttempt.status === 'complete' && finalAttempt.createdSessionId) {
+  //       await setActive({ session: finalAttempt.createdSessionId });
+  //       alert('Sign in successful');
+  //       navigate('/works', { replace: true });
+  //     } else {
+  //       console.error('Sign in did not complete:', finalAttempt);
+  //       alert('Error: Sign in failed. Check console for details.');
+  //     }
+  //   } catch (err) {
+  //     console.error('Sign-in error ->', err);
+  //     const msg = err?.errors?.[0]?.message || err?.message || 'Sign in failed';
+  //     alert('Error: ' + msg);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // to handle google sign in
+ 
+ const handleSignIn = async () => {
+  if (!email || !password) return alert("Please fill in all fields");
+  if (!signInLoaded) return;
+
+  setLoading(true);
+  try {
+    const signInAttempt = await signIn.create({
+      identifier: email,
+      password,
+      strategy: "password",
+    });
+
+    let finalAttempt = signInAttempt;
+    if (finalAttempt.status === "needs_first_factor") {
+      finalAttempt = await signIn.attemptFirstFactor({
+        strategy: "password",
+        password,
+      });
+    }
+
+    if (finalAttempt.status === "complete" && finalAttempt.createdSessionId) {
+      // 👉 Fetch the user object to check their role
+      const { user } = finalAttempt;
+      const role = user?.publicMetadata?.role;
+
+      if (role !== "listener") {
+        alert("This account is not a listener account.");
+        return; // 🚫 Don't call setActive
+      }
+
+      await setActive({ session: finalAttempt.createdSessionId });
+      navigate("/works", { replace: true });
+    } else {
+      alert("Sign in failed");
+    }
+  } catch (err) {
+    console.error(err);
+    alert(err?.errors?.[0]?.message || "Sign in failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
+ 
   const handleGoogleSignIn = async () => {
     if (isSignedIn) {
       alert('You are already signed in');
