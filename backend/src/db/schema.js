@@ -12,14 +12,6 @@ export const favoritesTable = pgTable("favorites", {
 });
 
 
-// create a table for the votes
-// export const votesTable = pgTable("votes", {
-//    id: serial("id").primaryKey(),
-//    songId: text("song_id").notNull(), // references songs table
-//    voteCount: integer("vote_count").notNull().default(0),
-//    createdAt: timestamp("created_at").defaultNow(),
-// });
-
 
 
 export const votesTable = pgTable(
